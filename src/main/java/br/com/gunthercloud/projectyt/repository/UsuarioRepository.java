@@ -6,4 +6,6 @@ import br.com.gunthercloud.projectyt.entity.UsuarioEntity;
 
 public interface UsuarioRepository extends JpaRepository<UsuarioEntity, Long>{
 
+	boolean existsByLogin(String login);
+
 }

@@ -21,11 +21,17 @@ public class UsuarioService {
 		return usuarios.stream().map(UsuarioDTO::new).toList();
 	}
 
-	public void criarUsuario(UsuarioDTO obj) {
-		usuarioRepository.save(new UsuarioEntity(obj));
+	public UsuarioDTO criarUsuario(UsuarioDTO obj) {
+		if(usuarioRepository.existsByLogin(obj.getLogin())) 
+			throw new IllegalArgumentException("Login já existe!");
+		UsuarioEntity user = usuarioRepository.save(new UsuarioEntity(obj));
+		return new UsuarioDTO(user);
 	}
 	
-	public UsuarioDTO alterarUsuario(UsuarioDTO obj) {
+	public UsuarioDTO alterarUsuario(Long id, UsuarioDTO obj) {
+		if(!usuarioRepository.existsById(id))
+			throw new IllegalArgumentException("Usuário não existe");
+		obj.setId(id);
 		UsuarioEntity u = usuarioRepository.save(new UsuarioEntity(obj));
 		return new UsuarioDTO(u);
 	}
