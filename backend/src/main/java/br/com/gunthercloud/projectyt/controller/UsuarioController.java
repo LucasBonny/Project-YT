@@ -34,7 +34,10 @@ public class UsuarioController {
 
 	@PostMapping
 	public ResponseEntity<UsuarioDTO> criarUsuario(@RequestBody UsuarioDTO obj) {
+		if(obj.getId() != null) obj.setId(null);
+		System.out.println("USER: " + obj.getId() + ", " + obj.getLogin() + ", " + obj.getSenha() + ", " + obj.getEmail());
 		obj = usuarioService.criarUsuario(obj);
+		System.out.println("USER: " + obj.getId() + ", " + obj.getLogin() + ", " + obj.getSenha() + ", " + obj.getEmail());
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}

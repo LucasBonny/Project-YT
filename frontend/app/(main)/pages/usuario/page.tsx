@@ -36,11 +36,10 @@ const Crud = () => {
     const usuarioService = new UsuarioService();
 
     useEffect(() => {
-        usuarioService.listarTodos().then((response) => {
-            setUsuarios(response.data)
-        }).catch((error) => {
-            console.log(error)
-        });
+        //ProductService.getProducts().then((data) => setUsuarios(data as any));
+        usuarioService.listarTodos()
+        .then((response) => setUsuarios(response.data))
+        .catch((err) => console.log(err));
     }, []);
 
     const openNew = () => {
@@ -64,6 +63,44 @@ const Crud = () => {
 
     const saveUsuario = () => {
         setSubmitted(true);
+
+        if(!usuario.id) {
+            usuarioService.inserir(usuario).then((response) => {
+                setUsuarioDialog(false)
+                setUsuario(usuarioVazio)
+                toast.current?.show({
+                    severity: 'info',
+                    summary: 'Sucesso!',
+                    detail: 'Usuário cadastrado com sucesso!'
+                });
+            })
+            .catch((err) => 
+                toast.current?.show({
+                severity: 'error',
+                summary: 'Erro!',
+                detail: 'Erro ao cadastrar!' + err
+                })
+            )
+        }
+        else{
+            usuarioService.alterar(usuario).then((response) => {
+                setUsuarioDialog(false)
+                setUsuario(usuarioVazio)
+                toast.current?.show({
+                    severity: 'info',
+                    summary: 'Sucesso!',
+                    detail: 'Usuário alterado com sucesso!'
+                    
+                })
+            })
+            .catch((err) => {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Erro!',
+                    detail: 'Erro ao alterar o usuário!' + err
+                })
+            })
+        }
 
         // if (product.name.trim()) {
         //     let _products = [...(products as any)];
@@ -96,17 +133,18 @@ const Crud = () => {
         // }
     };
 
-    const editUsuario = (product: Projeto.Usuario) => {
+    const editUsuario = (usuario: Projeto.Usuario) => {
         setUsuario({ ...usuario });
         setUsuarioDialog(true);
     };
 
-    const confirmDeleteUsuario = (product: Projeto.Usuario) => {
+    const confirmDeleteUsuario = (usuario: Projeto.Usuario) => {
         setUsuario(usuario);
         setDeleteUsuarioDialog(true);
     };
 
     const deleteUsuario = () => {
+
         // let _products = (products as any)?.filter((val: any) => val.id !== product.id);
         // setProducts(_products);
         // setDeleteProductDialog(false);
@@ -167,10 +205,12 @@ const Crud = () => {
     //     setProduct(_product);
     // };
 
-    const onInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, name: string) => {
+    const onInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, 
+        nome: keyof Pick<Projeto.Usuario, 'nome' | 'login' | 'senha' | 'email'>
+    ) => {
         const val = (e.target && e.target.value) || '';
         let _usuario = { ...usuario };
-        //_usuario[`${name}`] = val;
+        _usuario[nome] = val;
 
         setUsuario(_usuario);
     };
@@ -197,8 +237,8 @@ const Crud = () => {
     const rightToolbarTemplate = () => {
         return (
             <React.Fragment>
-                <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} chooseLabel="Importar" className="mr-2 inline-block" />
-                <Button label="Exportar" icon="pi pi-upload" severity="help" onClick={exportCSV} />
+                <FileUpload mode="basic" accept="image/*" maxFileSize={1000000} chooseLabel="Import" className="mr-2 inline-block" />
+                <Button label="Export" icon="pi pi-upload" severity="help" onClick={exportCSV} />
             </React.Fragment>
         );
     };
@@ -302,14 +342,14 @@ const Crud = () => {
                         responsiveLayout="scroll"
                     >
                         <Column selectionMode="multiple" headerStyle={{ width: '4rem' }}></Column>
-                        <Column field="id" header="Código" sortable body={idBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="id" header="Código" sortable body={idBodyTemplate} headerStyle={{ minWidth: '4rem' }}></Column>
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="login" header="Login" sortable body={loginBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
-                    <Dialog visible={usuarioDialog} style={{ width: '450px' }} header="Detalhes do usuário" modal className="p-fluid" footer={usuarioDialogFooter} onHide={hideDialog}>
+                    <Dialog visible={usuarioDialog} style={{ width: '450px' }} header="Detalhe do usuário" modal className="p-fluid" footer={usuarioDialogFooter} onHide={hideDialog}>
                         <div className="field">
                             <label htmlFor="nome">Nome</label>
                             <InputText
@@ -324,6 +364,7 @@ const Crud = () => {
                             />
                             {submitted && !usuario.nome && <small className="p-invalid">Nome é obrigatório.</small>}
                         </div>
+
                         <div className="field">
                             <label htmlFor="login">Login</label>
                             <InputText
@@ -338,6 +379,22 @@ const Crud = () => {
                             />
                             {submitted && !usuario.login && <small className="p-invalid">Login é obrigatório.</small>}
                         </div>
+
+                        <div className="field">
+                            <label htmlFor="name">Email</label>
+                            <InputText
+                                id="email"
+                                value={usuario.email}
+                                onChange={(e) => onInputChange(e, 'email')}
+                                required
+                                autoFocus
+                                className={classNames({
+                                    'p-invalid': submitted && !usuario.email
+                                })}
+                            />
+                            {submitted && !usuario.email && <small className="p-invalid">Email é obrigatório.</small>}
+                        </div>
+
                         <div className="field">
                             <label htmlFor="senha">Senha</label>
                             <InputText
@@ -352,35 +409,22 @@ const Crud = () => {
                             />
                             {submitted && !usuario.senha && <small className="p-invalid">Senha é obrigatório.</small>}
                         </div>
-                        <div className="field">
-                            <label htmlFor="email">Email</label>
-                            <InputText
-                                id="email"
-                                value={usuario.email}
-                                onChange={(e) => onInputChange(e, 'email')}
-                                required
-                                autoFocus
-                                className={classNames({
-                                    'p-invalid': submitted && !usuario.email
-                                })}
-                            />
-                            {submitted && !usuario.email && <small className="p-invalid">Email é obrigatório.</small>}
-                        </div>
 
+                        
                     </Dialog>
 
-                    <Dialog visible={deleteUsuarioDialog} style={{ width: '450px' }} header="Confirmar" modal footer={deleteUsuarioDialogFooter} onHide={hideDeleteUsuarioDialog}>
+                    <Dialog visible={deleteUsuarioDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUsuarioDialogFooter} onHide={hideDeleteUsuarioDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                             {usuario && (
                                 <span>
-                                    Você tem certeza que deseja remover o usuário <b>{usuario.nome}</b>?
+                                    Tem certeza que deseja remover <b>{usuario.nome}</b>?
                                 </span>
                             )}
                         </div>
                     </Dialog>
 
-                    <Dialog visible={deleteUsuariosDialog} style={{ width: '450px' }} header="Confirmar" modal footer={deleteUsuariosDialogFooter} onHide={hideDeleteUsuariosDialog}>
+                    <Dialog visible={deleteUsuariosDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUsuariosDialogFooter} onHide={hideDeleteUsuariosDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                             {usuario && <span>Você realmente deseja remover os usuários selecionados?</span>}
