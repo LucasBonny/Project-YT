@@ -36,7 +36,6 @@ const Crud = () => {
     const usuarioService = new UsuarioService();
 
     useEffect(() => {
-        //ProductService.getProducts().then((data) => setUsuarios(data as any));
         usuarioService.listarTodos()
         .then((response) => setUsuarios(response.data))
         .catch((err) => console.log(err));
@@ -69,7 +68,7 @@ const Crud = () => {
                 setUsuarioDialog(false)
                 setUsuario(usuarioVazio)
                 toast.current?.show({
-                    severity: 'info',
+                    severity: 'success',
                     summary: 'Sucesso!',
                     detail: 'Usuário cadastrado com sucesso!'
                 });
@@ -87,7 +86,7 @@ const Crud = () => {
                 setUsuarioDialog(false)
                 setUsuario(usuarioVazio)
                 toast.current?.show({
-                    severity: 'info',
+                    severity: 'success',
                     summary: 'Sucesso!',
                     detail: 'Usuário alterado com sucesso!'
                     
@@ -144,6 +143,21 @@ const Crud = () => {
     };
 
     const deleteUsuario = () => {
+
+        usuarioService.excluir(usuario.id).then((response) => {
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Sucesso!',
+                detail: "Usuário deletado com sucesso!"
+            })
+        })
+        .catch((error) => {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Erro!',
+                detail: error
+            })
+        })
 
         // let _products = (products as any)?.filter((val: any) => val.id !== product.id);
         // setProducts(_products);
