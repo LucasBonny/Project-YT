@@ -32,8 +32,7 @@ public class UsuarioService {
 		if(!usuarioRepository.existsById(id))
 			throw new IllegalArgumentException("Usuário não existe");
 		obj.setId(id);
-		UsuarioEntity u = usuarioRepository.save(new UsuarioEntity(obj));
-		return new UsuarioDTO(u);
+		return new UsuarioDTO(usuarioRepository.save(new UsuarioEntity(obj)));
 	}
 	
 	public void removerUsuario(Long id) {

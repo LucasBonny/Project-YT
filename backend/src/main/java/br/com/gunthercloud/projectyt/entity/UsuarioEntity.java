@@ -13,7 +13,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "SW_USER")
+@Table(name = "SW_USUARIO")
 public class UsuarioEntity {
 
 	@Id
