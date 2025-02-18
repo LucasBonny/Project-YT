@@ -58,6 +58,5 @@ export type {
     AppMailSidebarItem,
     AppMailReplyProps,
     AppMailProps,
-    AppMenuItem,
-    Projeto
+    AppMenuItem
 };
