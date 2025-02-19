@@ -19,7 +19,7 @@ import { Projeto } from '@/types';
 import { UsuarioService } from '@/service/UsuarioService';
 
 /* @todo Used 'as any' for types here. Will fix in next version due to onSelectionChange event type issue. */
-const Crud = () => {
+const Usuario = () => {
     let usuarioVazio: Projeto.Usuario = {
         id: 0,
         nome: '',
@@ -28,7 +28,7 @@ const Crud = () => {
         email: ''
     };
 
-    const [usuarios, setUsuarios] = useState(null);
+    const [usuarios, setUsuarios] = useState<Projeto.Usuario[]>([]);
     const [usuarioDialog, setUsuarioDialog] = useState(false);
     const [deleteUsuarioDialog, setDeleteUsuarioDialog] = useState(false);
     const [deleteUsuariosDialog, setDeleteUsuariosDialog] = useState(false);
@@ -41,11 +41,13 @@ const Crud = () => {
     const usuarioService = new UsuarioService();
 
     useEffect(() => {
-        //ProductService.getProducts().then((data) => setProducts(data as any));
-        usuarioService.listarTodos().then((response) => {
-            setUsuarios(response.data);
-        }).catch((error) => console.log(error));
-    }, []);
+        if(usuarios.length == 0) {
+            usuarioService.listarTodos().then((response) => {
+                setUsuarios(response.data);
+            }).catch((error) => console.log(error));
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [usuarios]);
 
     const openNew = () => {
         setUsuario(usuarioVazio);
@@ -69,35 +71,45 @@ const Crud = () => {
     const saveUsuario = () => {
         setSubmitted(true);
 
-        // if (usuario.name.trim()) {
-        //     let _usuarios = [...(usuarios as any)];
-        //     let _usuario = { ...usuario };
-        //     if (usuario.id) {
-        //         const index = findIndexById(usuario.id);
-
-        //         _usuarios[index] = _usuario;
-        //         toast.current?.show({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Updated',
-        //             life: 3000
-        //         });
-        //     } else {
-        //         _usuario.id = createId();
-        //         _usuario.image = 'product-placeholder.svg';
-        //         _usuarios.push(_usuario);
-        //         toast.current?.show({
-        //             severity: 'success',
-        //             summary: 'Successful',
-        //             detail: 'Product Created',
-        //             life: 3000
-        //         });
-        //     }
-
-        //     setUsuarios(_usuario as any);
-        //     setUsuarioDialog(false);
-        //     setUsuario(usuarioVazio);
-        // }
+        if(!usuario.id) {
+            usuarioService.inserir(usuario)
+                .then(() => {
+                    setUsuarios([]);
+                    toast.current?.show({
+                        severity: 'success',
+                        summary: 'Sucesso',
+                        detail: 'Usuario Criado',
+                        life: 5000
+                    });
+                }).catch((error) => {
+                    toast.current?.show({
+                    severity: 'error',
+                    summary: 'Erro!',
+                    detail: error.response.data.message,
+                    life: 5000
+                });
+                });
+        } else {
+            usuarioService.alterar(usuario)
+            .then(() => {
+                setUsuarios([]);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Sucesso',
+                    detail: 'Usuario atualizado',
+                    life: 5000
+                });
+            }).catch((error) => {
+                toast.current?.show({
+                severity: 'error',
+                summary: 'Erro!',
+                detail: 'Erro ao alterar o usuário',
+                life: 5000
+                });
+            });
+        }
+        setUsuarioDialog(false);
+        setUsuario(usuarioVazio);
     };
 
     const editUsuario = (product: Projeto.Usuario) => {
@@ -115,34 +127,25 @@ const Crud = () => {
         setUsuarios(_products);
         setDeleteUsuarioDialog(false);
         setUsuario(usuarioVazio);
-        toast.current?.show({
-            severity: 'success',
-            summary: 'Successful',
-            detail: 'Product Deleted',
-            life: 3000
+        usuarioService.excluir(usuario.id)
+        .then(() => {
+            setUsuarios([]);
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: 'Usuário Deletado',
+                life: 5000
+            });
+        }).catch((error) => {
+            toast.current?.show({
+            severity: 'error',
+            summary: 'Erro!',
+            detail: 'Erro ao deletar usuário',
+            life: 5000
         });
+        }
+        );
     };
-
-    // const findIndexById = (id: string) => {
-    //     let index = -1;
-    //     for (let i = 0; i < (usuarios as any)?.length; i++) {
-    //         if ((usuarios as any)[i].id === id) {
-    //             index = i;
-    //             break;
-    //         }
-    //     }
-
-    //     return index;
-    // };
-
-    // const createId = () => {
-    //     let id = '';
-    //     let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    //     for (let i = 0; i < 5; i++) {
-    //         id += chars.charAt(Math.floor(Math.random() * chars.length));
-    //     }
-    //     return id;
-    // };
 
     const exportCSV = () => {
         dt.current?.exportCSV();
@@ -159,17 +162,11 @@ const Crud = () => {
         setSelectedUsuarios(null);
         toast.current?.show({
             severity: 'success',
-            summary: 'Successful',
-            detail: 'Products Deleted',
+            summary: 'Sucesso',
+            detail: 'Usuarios deletados',
             life: 3000
         });
     };
-
-    // const onCategoryChange = (e: RadioButtonChangeEvent) => {
-    //     let _product = { ...usuario };
-    //     _product['category'] = e.value;
-    //     setUsuario(_product);
-    // };
 
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, nome: string) => {
         const val = (e.target && e.target.value) || '';
@@ -178,14 +175,6 @@ const Crud = () => {
 
         setUsuario(_usuario);
     };
-
-    // const onInputNumberChange = (e: InputNumberValueChangeEvent, name: string) => {
-    //     const val = e.value || 0;
-    //     let _product = { ...usuario };
-    //     _product[`${name}`] = val;
-
-    //     setUsuario(_product);
-    // };
 
     const leftToolbarTemplate = () => {
         return (
@@ -381,7 +370,7 @@ const Crud = () => {
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
                             {usuario && (
                                 <span>
-                                    Are you sure you want to delete <b>{usuario.nome}</b>?
+                                    Tem certeza de que deseja excluir <b>{usuario.nome}</b>?
                                 </span>
                             )}
                         </div>
@@ -390,7 +379,7 @@ const Crud = () => {
                     <Dialog visible={deleteUsuariosDialog} style={{ width: '450px' }} header="Confirm" modal footer={deleteUsuariosDialogFooter} onHide={hideDeleteUsuariosDialog}>
                         <div className="flex align-items-center justify-content-center">
                             <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: '2rem' }} />
-                            {usuario && <span>Are you sure you want to delete the selected products?</span>}
+                            {usuario && <span>Tem certeza de que deseja excluir os usuários selecionados?</span>}
                         </div>
                     </Dialog>
                 </div>
@@ -399,4 +388,4 @@ const Crud = () => {
     );
 };
 
-export default Crud;
+export default Usuario;

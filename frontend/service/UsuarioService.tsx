@@ -1,3 +1,4 @@
+import { Projeto } from '@/types'
 import axios from 'axios'
 
 export const axiosInstance = axios.create({
@@ -12,16 +13,13 @@ export class UsuarioService {
   listarTodos() {
     return axiosInstance.get('/usuario')
   }
-  getUsuarioById(id: number) {
-    return axiosInstance.get(`/usuario/${id}`)
-  }
-  createUsuario(usuario: any) {
+  inserir(usuario : Projeto.Usuario) {
     return axiosInstance.post('/usuario', usuario)
   }
-  updateUsuario(usuario: any) {
+  alterar(usuario: Projeto.Usuario) {
     return axiosInstance.put(`/usuario/${usuario.id}`, usuario)
   }
-  deleteUsuario(id: number) {
+  excluir(id: number) {
     return axiosInstance.delete(`/usuario/${id}`)
   }
 }
