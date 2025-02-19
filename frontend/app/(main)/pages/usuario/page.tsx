@@ -5,20 +5,14 @@ import { Column } from 'primereact/column';
 import { DataTable } from 'primereact/datatable';
 import { Dialog } from 'primereact/dialog';
 import { FileUpload } from 'primereact/fileupload';
-import { InputNumber, InputNumberValueChangeEvent } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';
-import { Rating } from 'primereact/rating';
 import { Toast } from 'primereact/toast';
 import { Toolbar } from 'primereact/toolbar';
 import { classNames } from 'primereact/utils';
-import React, { useEffect, useRef, useState } from 'react';
-import { ProductService } from '../../../../demo/service/ProductService';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Projeto } from '@/types';
 import { UsuarioService } from '@/service/UsuarioService';
 
-/* @todo Used 'as any' for types here. Will fix in next version due to onSelectionChange event type issue. */
 const Usuario = () => {
     let usuarioVazio: Projeto.Usuario = {
         id: 0,
@@ -33,12 +27,12 @@ const Usuario = () => {
     const [deleteUsuarioDialog, setDeleteUsuarioDialog] = useState(false);
     const [deleteUsuariosDialog, setDeleteUsuariosDialog] = useState(false);
     const [usuario, setUsuario] = useState<Projeto.Usuario>(usuarioVazio);
-    const [selectedUsuarios, setSelectedUsuarios] = useState(null);
+    const [selectedUsuarios, setSelectedUsuarios] = useState<Projeto.Usuario[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [globalFilter, setGlobalFilter] = useState('');
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
-    const usuarioService = new UsuarioService();
+    const usuarioService = useMemo(() => new UsuarioService(), []);
 
     useEffect(() => {
         if(usuarios.length == 0) {
@@ -46,8 +40,7 @@ const Usuario = () => {
                 setUsuarios(response.data);
             }).catch((error) => console.log(error));
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [usuarios]);
+    }, [usuarioService, usuarios]);
 
     const openNew = () => {
         setUsuario(usuarioVazio);
@@ -156,16 +149,28 @@ const Usuario = () => {
     };
 
     const deleteSelectedUsuarios = () => {
-        let _products = (usuarios as any)?.filter((val: any) => !(selectedUsuarios as any)?.includes(val));
-        setUsuarios(_products);
-        setDeleteUsuariosDialog(false);
-        setSelectedUsuarios(null);
-        toast.current?.show({
-            severity: 'success',
-            summary: 'Sucesso',
-            detail: 'Usuarios deletados',
-            life: 3000
+        selectedUsuarios.map((usuario) => {
+            let _usuarios = (usuarios as any)?.filter((val: any) => val.id !== usuario.id);
+            setUsuarios(_usuarios);
+            usuarioService.excluir(usuario.id)
+            .then(() => {
+                setUsuarios([]);
+                toast.current?.show({
+                    severity: 'success',
+                    summary: 'Sucesso',
+                    detail: 'Usuário Deletado',
+                    life: 5000
+                });
+            }).catch((error) => {
+                toast.current?.show({
+                severity: 'error',
+                summary: 'Erro!',
+                detail: 'Erro ao deletar usuário',
+                life: 5000
+            });
+            });
         });
+        setDeleteUsuariosDialog(false);
     };
 
     const onInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, nome: string) => {
