@@ -8,4 +8,10 @@ declare namespace Demo {
         email: string;
     };
 
+    type Recurso = {
+        id?: number;
+        nome: string;
+        chave: string;
+    }
+
 }
