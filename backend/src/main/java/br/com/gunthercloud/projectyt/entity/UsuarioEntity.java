@@ -44,6 +44,7 @@ public class UsuarioEntity {
 	
 	public UsuarioEntity(UsuarioDTO usuario) {
 		BeanUtils.copyProperties(usuario, this);
+		perfil = new PerfilEntity(usuario.getPerfil());
 	}
 
 	public UsuarioEntity(Long id, String nome, String login, String senha, String email, PerfilEntity perfil) {
@@ -118,6 +119,12 @@ public class UsuarioEntity {
 			return false;
 		UsuarioEntity other = (UsuarioEntity) obj;
 		return Objects.equals(id, other.id);
+	}
+
+	@Override
+	public String toString() {
+		return "UsuarioEntity [id=" + id + ", nome=" + nome + ", login=" + login + ", senha=" + senha + ", email="
+				+ email + ", perfil=" + perfil.getDescricao() + "]";
 	}
 	
 	

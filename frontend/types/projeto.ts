@@ -6,6 +6,7 @@ declare namespace Projeto {
         login: string;
         senha: string;
         email: string;
+        perfil: Perfil;
     };
 
     type Recurso = {

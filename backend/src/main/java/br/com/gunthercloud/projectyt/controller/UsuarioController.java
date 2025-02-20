@@ -42,8 +42,10 @@ public class UsuarioController implements ControllerModel<UsuarioDTO> {
 	@PostMapping
 	@Override
 	public ResponseEntity<UsuarioDTO> insert(@RequestBody UsuarioDTO obj) {
+		System.out.println(obj);
 		if(obj.getId() != null) obj.setId(null);
 		obj = service.insert(obj);
+		System.out.println(obj);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}

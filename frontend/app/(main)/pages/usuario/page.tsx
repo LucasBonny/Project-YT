@@ -11,14 +11,20 @@ import { classNames } from 'primereact/utils';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Projeto } from '@/types';
 import { UsuarioService } from '@/service/UsuarioService';
+import { PerfilService } from '@/service/PerfilService';
+import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 
 const Usuario = () => {
     let usuarioVazio: Projeto.Usuario = {
-        id: 0,
+        id: null,
         nome: '',
         login: '',
         senha: '',
-        email: ''
+        email: '',
+        perfil: {
+            id: null,
+            descricao: ''
+        }
     };
 
     const [usuarios, setUsuarios] = useState<Projeto.Usuario[]>([]);
@@ -32,6 +38,8 @@ const Usuario = () => {
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
     const usuarioService = useMemo(() => new UsuarioService(), []);
+    const perfilService = useMemo(() => new PerfilService(), []);
+    const [perfil, setPerfil] = useState<Projeto.Perfil[]>([]);
 
     useEffect(() => {
         if(usuarios.length == 0) {
@@ -40,6 +48,21 @@ const Usuario = () => {
             }).catch((error) => console.log(error));
         }
     }, [usuarioService, usuarios]);
+
+    useEffect(() => {
+        if(usuarioDialog) {
+            perfilService.listarTodos().then((response) => {
+                setPerfil(response.data);
+            }).catch((error) => {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Erro!',
+                    detail: error.response.data.message,
+                    life: 5000
+                });
+            });
+        }
+    }, [perfilService, usuarioDialog]);
 
     const openNew = () => {
         setUsuario(usuarioVazio);
@@ -62,61 +85,79 @@ const Usuario = () => {
 
     const saveUsuario = () => {
         setSubmitted(true);
-
-        if(!usuario.id) {
+    
+        const requiredFields = ['nome', 'login', 'senha', 'email', 'descricao']; 
+        
+        const hasEmptyField = requiredFields.some(field => 
+            !usuario[field]?.trim()
+        );
+    
+        if (hasEmptyField) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Erro!',
+                detail: 'Preencha todos os campos obrigatórios',
+                life: 5000
+            });
+            return;
+        }
+    
+        let _usuarios = [...(usuarios as any)];
+        
+        if (usuario.id) {
+            usuarioService.alterar(usuario)
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: 'Usuário Atualizado',
+                life: 5000
+            });
+            setShouldReloadResources(true);
+        } else {
             usuarioService.inserir(usuario)
                 .then(() => {
-                    setUsuarios([]);
                     toast.current?.show({
                         severity: 'success',
                         summary: 'Sucesso',
-                        detail: 'Usuario Criado',
+                        detail: 'Usuário Criado!',
                         life: 5000
                     });
-                }).catch((error) => {
+                    setShouldReloadResources(true);
+                })
+                .catch((error) => {
                     toast.current?.show({
-                    severity: 'error',
-                    summary: 'Erro!',
-                    detail: error.response.data.message,
-                    life: 5000
+                        severity: 'error',
+                        summary: 'Erro!',
+                        detail: error.response?.data?.message || 'Erro desconhecido',
+                        life: 5000
+                    });
                 });
-            });
-        } else {
-            usuarioService.alterar(usuario)
-            .then(() => {
-                setUsuarios([]);
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Sucesso',
-                    detail: 'Usuario atualizado',
-                    life: 5000
-                });
-            }).catch((error) => {
-                toast.current?.show({
-                severity: 'error',
-                summary: 'Erro!',
-                detail: 'Erro ao alterar o usuário',
-                life: 5000
-                });
-            });
         }
+    
+        setUsuarios(_usuarios as any);
         setUsuarioDialog(false);
         setUsuario(usuarioVazio);
     };
 
-    const editUsuario = (product: Projeto.Usuario) => {
-        setUsuario({ ...product });
+    const editUsuario = (usuario: Projeto.Usuario) => {
+        setUsuario({ ...usuario });
         setUsuarioDialog(true);
     };
 
-    const confirmDeleteUsuario = (product: Projeto.Usuario) => {
-        setUsuario(product);
+    const onSelectPerfilChange = (perfil: Projeto.Perfil) => {
+        let _usuario = { ...usuario };
+        _usuario.perfil = perfil;
+        setUsuario(_usuario);
+    }
+
+    const confirmDeleteUsuario = (usuario: Projeto.Usuario) => {
+        setUsuario(usuario);
         setDeleteUsuarioDialog(true);
     };
 
     const deleteUsuario = () => {
-        let _products = (usuarios as any)?.filter((val: any) => val.id !== usuario.id);
-        setUsuarios(_products);
+        let _usuarios = (usuarios as any)?.filter((val: any) => val.id !== usuario.id);
+        setUsuarios(_usuarios);
         setDeleteUsuarioDialog(false);
         setUsuario(usuarioVazio);
         usuarioService.excluir(usuario.id)
@@ -124,7 +165,7 @@ const Usuario = () => {
             setUsuarios([]);
             toast.current?.show({
                 severity: 'success',
-                summary: 'Sucesso',
+                summary: 'Sucesso!',
                 detail: 'Usuário Deletado',
                 life: 5000
             });
@@ -236,6 +277,15 @@ const Usuario = () => {
         );
     };
 
+    const descricaoBodyTemplate = (rowData: Projeto.Usuario) => {
+        return (
+            <>
+                <span className="p-column-title">Descrição</span>
+                {rowData.perfil.descricao}
+            </>
+        );
+    };
+
     const actionBodyTemplate = (rowData: Projeto.Usuario) => {
         return (
             <>
@@ -303,6 +353,7 @@ const Usuario = () => {
                         <Column field="nome" header="Nome" sortable body={nomeBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="login" header="Login" sortable body={loginBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column field="email" header="Email" sortable body={emailBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
+                        <Column field="descricao" header="Descrição" sortable body={descricaoBodyTemplate} headerStyle={{ minWidth: '15rem' }}></Column>
                         <Column body={actionBodyTemplate} headerStyle={{ minWidth: '10rem' }}></Column>
                     </DataTable>
 
@@ -365,6 +416,23 @@ const Usuario = () => {
                                 })}
                             />
                             {submitted && !usuario.email && <small className="p-invalid">Email é obrigatório.</small>}
+                        </div>
+
+                        <div className="field">
+                            <label htmlFor="descricao">Descrição</label>
+                            <Dropdown
+                                value={usuario.perfil}
+                                options={perfil}
+                                onChange={(e: DropdownChangeEvent) => onSelectPerfilChange(e.value)}
+                                optionLabel="descricao"
+                                placeholder="Selecione um perfil"
+                                required
+                                autoFocus
+                                className={classNames({
+                                    'p-invalid': submitted && !usuario.descricao
+                                })}
+                            />
+                            {submitted && !usuario.descricao && <small className="p-invalid">Perfil obrigatório.</small>}
                         </div>
 
                     </Dialog>

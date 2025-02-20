@@ -2,6 +2,7 @@ package br.com.gunthercloud.projectyt.dto;
 
 import org.springframework.beans.BeanUtils;
 
+import br.com.gunthercloud.projectyt.entity.PerfilEntity;
 import br.com.gunthercloud.projectyt.entity.UsuarioEntity;
 
 public class UsuarioDTO {
@@ -28,7 +29,10 @@ public class UsuarioDTO {
 
 	public UsuarioDTO(UsuarioEntity usuario) {
 		BeanUtils.copyProperties(usuario, this);
-		perfil = new PerfilDTO(usuario.getPerfil());
+	}
+	public UsuarioDTO(UsuarioEntity usuario, PerfilEntity perfil) {
+		BeanUtils.copyProperties(usuario, this);
+		this.perfil = new PerfilDTO(perfil);
 	}
 	
 	public Long getId() {
@@ -67,5 +71,13 @@ public class UsuarioDTO {
 	public void setPerfil(PerfilDTO perfil) {
 		this.perfil = perfil;
 	}
+
+	@Override
+	public String toString() {
+		return "UsuarioDTO [id=" + id + ", nome=" + nome + ", login=" + login + ", senha=" + senha + ", email=" + email
+				+ ", perfil()=" + getPerfil().getDescricao() + "]";
+	}
+	
+	
 
 }
