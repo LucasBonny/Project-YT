@@ -10,17 +10,19 @@ import br.com.gunthercloud.projectyt.entity.RecursoEntity;
 import br.com.gunthercloud.projectyt.repository.RecursoRepository;
 
 @Service
-public class RecursoService {
+public class RecursoService implements ServiceModel<RecursoDTO> {
 	
 	@Autowired
 	private RecursoRepository recursoRepository;
 	
-	public List<RecursoDTO> listarTodos() {
+	@Override
+	public List<RecursoDTO> findAll() {
 		List<RecursoEntity> recurso = recursoRepository.findAll();
 		return recurso.stream().map(RecursoDTO::new).toList();
 	}
 	
-	public RecursoDTO buscarPorId(Long id) {
+	@Override
+	public RecursoDTO findById(Long id) {
 		if(recursoRepository.existsById(id)) {
 			RecursoEntity entity = recursoRepository.findById(id).get();
 			return new RecursoDTO(entity);
@@ -28,20 +30,23 @@ public class RecursoService {
 		throw new IllegalArgumentException("O id informado não existe!");
 	}
 	
+	@Override
 	public RecursoDTO insert(RecursoDTO obj) {
 		RecursoEntity entity = new RecursoEntity(obj);
 		entity = recursoRepository.save(entity);
 		return new RecursoDTO(entity);
 	}
 	
-	public RecursoDTO alterar(Long id, RecursoDTO obj) {
+	@Override
+	public RecursoDTO update(Long id, RecursoDTO obj) {
 		if(!recursoRepository.existsById(id))
 			throw new IllegalArgumentException("O id informado não existe!");
 		obj.setId(id);
 		return new RecursoDTO(recursoRepository.save(new RecursoEntity(obj)));
 	}
 
-	public void excluir(Long id) {
+	@Override
+	public void delete(Long id) {
 		if(!recursoRepository.existsById(id)) {
 			throw new IllegalArgumentException("O id informado não existe!");
 		}

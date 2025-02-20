@@ -10,37 +10,42 @@ import br.com.gunthercloud.projectyt.entity.UsuarioEntity;
 import br.com.gunthercloud.projectyt.repository.UsuarioRepository;
 
 @Service
-public class UsuarioService {
+public class UsuarioService implements ServiceModel<UsuarioDTO> {
 	
 	@Autowired
 	private UsuarioRepository usuarioRepository;
 	
-	public List<UsuarioDTO> listarTodos() {
+	@Override
+	public List<UsuarioDTO> findAll() {
 		List<UsuarioEntity> usuarios = usuarioRepository.findAll();
-		//return usuarios.stream().map(x -> new UsuarioDTO(x)).toList();
 		return usuarios.stream().map(UsuarioDTO::new).toList();
 	}
+	
+	@Override
+	public UsuarioDTO findById(Long id) {
+		return new UsuarioDTO(usuarioRepository.findById(id).get());
+	}
 
-	public UsuarioDTO criarUsuario(UsuarioDTO obj) {
+	@Override
+	public UsuarioDTO insert(UsuarioDTO obj) {
 		if(usuarioRepository.existsByLogin(obj.getLogin())) 
 			throw new IllegalArgumentException("Login já existe!");
 		UsuarioEntity user = usuarioRepository.save(new UsuarioEntity(obj));
 		return new UsuarioDTO(user);
 	}
 	
-	public UsuarioDTO alterarUsuario(Long id, UsuarioDTO obj) {
+	@Override
+	public UsuarioDTO update(Long id, UsuarioDTO obj) {
 		if(!usuarioRepository.existsById(id))
 			throw new IllegalArgumentException("Usuário não existe");
 		obj.setId(id);
 		return new UsuarioDTO(usuarioRepository.save(new UsuarioEntity(obj)));
 	}
 	
-	public void removerUsuario(Long id) {
-		UsuarioEntity u = usuarioRepository.findById(id).get();
-		usuarioRepository.delete(u);
+	@Override
+	public void delete(Long id) {
+		UsuarioEntity user = usuarioRepository.findById(id).get();
+		usuarioRepository.delete(user);
 	}
 	
-	public UsuarioDTO buscarPorId(Long id) {
-		return new UsuarioDTO(usuarioRepository.findById(id).get());
-	}
 }

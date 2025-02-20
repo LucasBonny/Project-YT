@@ -22,38 +22,43 @@ import br.com.gunthercloud.projectyt.service.RecursoService;
 @RestController
 @RequestMapping(value = "/recurso")
 @CrossOrigin
-public class RecursoController {
+public class RecursoController implements ControllerModel<RecursoDTO> {
 	
 	@Autowired
-	private RecursoService recursoService;
+	private RecursoService service;
 
 	@GetMapping
-	public ResponseEntity<List<RecursoDTO>> listarTodos() {
-		return ResponseEntity.ok().body(recursoService.listarTodos());
+	@Override
+	public ResponseEntity<List<RecursoDTO>> findAll() {
+		return ResponseEntity.ok().body(service.findAll());
 	}
 
 	@GetMapping(value = "/{id}")
-	public ResponseEntity<RecursoDTO> buscarPorId(@PathVariable Long id) {
-		return ResponseEntity.ok().body(recursoService.buscarPorId(id));
+	@Override
+	public ResponseEntity<RecursoDTO> findById(@PathVariable Long id) {
+		return ResponseEntity.ok().body(service.findById(id));
 	}
 	
 	@PostMapping
-	public ResponseEntity<RecursoDTO> inserir(@RequestBody RecursoDTO objeto) {
+	@Override
+	public ResponseEntity<RecursoDTO> insert(@RequestBody RecursoDTO objeto) {
 		if(objeto.getId() != null) objeto.setId(null);
-		recursoService.insert(objeto);
+		service.insert(objeto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(objeto.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}
 	
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<RecursoDTO> alterar(@PathVariable Long id, @RequestBody RecursoDTO objeto) {
-		objeto = recursoService.alterar(id, objeto);
+	@Override
+	public ResponseEntity<RecursoDTO> update(@PathVariable Long id, @RequestBody RecursoDTO objeto) {
+		objeto = service.update(id, objeto);
 		return ResponseEntity.ok().body(objeto);
 	}
 	
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<Void> excluir(@PathVariable Long id) {
-		recursoService.excluir(id);
+	@Override
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		service.delete(id);
 		return ResponseEntity.noContent().build();
 	}
 }

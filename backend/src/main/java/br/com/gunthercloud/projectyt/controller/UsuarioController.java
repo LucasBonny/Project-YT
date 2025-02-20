@@ -22,33 +22,44 @@ import br.com.gunthercloud.projectyt.service.UsuarioService;
 @RestController
 @RequestMapping(value = "/usuario")
 @CrossOrigin
-public class UsuarioController {
+public class UsuarioController implements ControllerModel<UsuarioDTO> {
 	
 	@Autowired
-	private UsuarioService usuarioService;
+	private UsuarioService service;
 	
 	@GetMapping
-	public ResponseEntity<List<UsuarioDTO>> listarTodos() {
-		return ResponseEntity.ok(usuarioService.listarTodos());
+	@Override
+	public ResponseEntity<List<UsuarioDTO>> findAll() {
+		return ResponseEntity.ok(service.findAll());
+	}
+	
+	@GetMapping(value = "/{id}")
+	@Override
+	public ResponseEntity<UsuarioDTO> findById(@PathVariable Long id) {
+		return ResponseEntity.ok().body(service.findById(id));
 	}
 
 	@PostMapping
-	public ResponseEntity<UsuarioDTO> criarUsuario(@RequestBody UsuarioDTO obj) {
+	@Override
+	public ResponseEntity<UsuarioDTO> insert(@RequestBody UsuarioDTO obj) {
 		if(obj.getId() != null) obj.setId(null);
-		obj = usuarioService.criarUsuario(obj);
+		obj = service.insert(obj);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();
 	}
 	
 	@PutMapping(value = "/{id}")
-	public ResponseEntity<UsuarioDTO> alterarUsuario(@PathVariable Long id, @RequestBody UsuarioDTO obj) {
-		obj = usuarioService.alterarUsuario(id,obj);
+	@Override
+	public ResponseEntity<UsuarioDTO> update(@PathVariable Long id, @RequestBody UsuarioDTO obj) {
+		obj = service.update(id,obj);
 		return ResponseEntity.ok().body(obj);
 	}
 	
 	@DeleteMapping(value = "/{id}")
-	public ResponseEntity<Void> removerUsuario(@PathVariable Long id) {
-		usuarioService.removerUsuario(id);
+	@Override
+	public ResponseEntity<Void> delete(@PathVariable Long id) {
+		service.delete(id);
 		return ResponseEntity.noContent().build();
 	}
+
 }
