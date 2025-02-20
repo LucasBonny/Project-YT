@@ -80,7 +80,7 @@ const Usuario = () => {
                     detail: error.response.data.message,
                     life: 5000
                 });
-                });
+            });
         } else {
             usuarioService.alterar(usuario)
             .then(() => {
@@ -164,7 +164,7 @@ const Usuario = () => {
                 toast.current?.show({
                 severity: 'error',
                 summary: 'Erro!',
-                detail: 'Erro ao deletar usuário',
+                detail: error.response.data.message,
                 life: 5000
             });
             });

@@ -39,6 +39,7 @@ public class RecursoController {
 	
 	@PostMapping
 	public ResponseEntity<RecursoDTO> inserir(@RequestBody RecursoDTO objeto) {
+		if(objeto.getId() != null) objeto.setId(null);
 		recursoService.insert(objeto);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequestUri().path("/{id}").buildAndExpand(objeto.getId()).toUri();
 		return ResponseEntity.created(uri).build();

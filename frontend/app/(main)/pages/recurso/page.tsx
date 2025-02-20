@@ -30,14 +30,27 @@ const Recurso = () => {
     const toast = useRef<Toast>(null);
     const dt = useRef<DataTable<any>>(null);
     const recursoService = useMemo(() => new RecursoService(), []);
+    const [shouldReloadResources, setShouldReloadResources] = useState(false);
 
     useEffect(() => {
-        if(recursos.length == 0) {
-            recursoService.listarTodos().then((response) => {
-                setRecurso(response.data);
-            }).catch((error) => console.log(error));
-        }
-    }, [recursoService, recursos]);
+        const loadResources = async () => {
+            try {
+                const response = await recursoService.listarTodos();
+                setRecursos(response.data);
+                setShouldReloadResources(false); 
+            } catch (error) {
+                console.log(error);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Erro',
+                    detail: 'Falha ao carregar recursos',
+                    life: 5000
+                });
+            }
+        };
+    
+        loadResources();
+    }, [recursoService, shouldReloadResources]);
 
     const openNew = () => {
         setRecurso(recursoVazio);
@@ -60,47 +73,60 @@ const Recurso = () => {
 
     const saveRecurso = () => {
         setSubmitted(true);
-
-        if(!recurso.id) {
+    
+        const requiredFields = ['nome', 'chave']; 
+        
+        const hasEmptyField = requiredFields.some(field => 
+            !recurso[field]?.trim()
+        );
+    
+        if (hasEmptyField) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Erro!',
+                detail: 'Preencha todos os campos obrigatórios',
+                life: 5000
+            });
+            return;
+        }
+    
+        let _recursos = [...(recursos as any)];
+        
+        if (recurso.id) {
+            recursoService.alterar(recurso)
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: 'Recurso Atualizado',
+                life: 5000
+            });
+            setShouldReloadResources(true);
+        } else {
             recursoService.inserir(recurso)
                 .then(() => {
-                    setRecursos([]);
                     toast.current?.show({
                         severity: 'success',
                         summary: 'Sucesso',
-                        detail: 'Recurso Criado',
+                        detail: 'Recurso Criado!',
                         life: 5000
                     });
-                }).catch((error) => {
+                    setShouldReloadResources(true);
+                })
+                .catch((error) => {
                     toast.current?.show({
-                    severity: 'error',
-                    summary: 'Erro!',
-                    detail: error.response.data.message,
-                    life: 5000
+                        severity: 'error',
+                        summary: 'Erro!',
+                        detail: error.response?.data?.message || 'Erro desconhecido',
+                        life: 5000
+                    });
                 });
-                });
-        } else {
-            recursoService.alterar(recurso)
-            .then(() => {
-                setRecursos([]);
-                toast.current?.show({
-                    severity: 'success',
-                    summary: 'Sucesso',
-                    detail: 'Recurso atualizado',
-                    life: 5000
-                });
-            }).catch((error) => {
-                toast.current?.show({
-                severity: 'error',
-                summary: 'Erro!',
-                detail: 'Erro ao alterar o recurso',
-                life: 5000
-                });
-            });
         }
+    
+        setRecursos(_recursos as any);
         setRecursoDialog(false);
         setRecurso(recursoVazio);
     };
+    
 
     const editRecurso = (recurso: Projeto.Recurso) => {
         setRecurso({ ...recurso });
@@ -119,7 +145,7 @@ const Recurso = () => {
         setRecurso(recursoVazio);
         recursoService.excluir(recurso.id)
         .then(() => {
-            setRecursos([]);
+            setShouldReloadResources(true);
             toast.current?.show({
                 severity: 'success',
                 summary: 'Sucesso',
@@ -130,7 +156,7 @@ const Recurso = () => {
             toast.current?.show({
             severity: 'error',
             summary: 'Erro!',
-            detail: 'Erro ao deletar recurso',
+            detail: error.response.data.message,
             life: 5000
         });
         }
@@ -146,12 +172,21 @@ const Recurso = () => {
     };
 
     const deleteSelectedRecursos = () => {
+        if (!selectedRecursos || selectedRecursos.length === 0) {
+            toast.current?.show({
+                severity: 'warn',
+                summary: 'Nada selecionado',
+                detail: 'Selecione pelo menos um recurso para excluir',
+                life: 5000
+            });
+            return;
+        }
         selectedRecursos.map((recurso) => {
             let _recursos = (recursos as any)?.filter((val: any) => val.id !== recurso.id);
             setRecursos(_recursos);
             recursoService.excluir(recurso.id)
             .then(() => {
-                setRecursos([]);
+                setShouldReloadResources(true);
                 toast.current?.show({
                     severity: 'success',
                     summary: 'Sucesso',
@@ -162,7 +197,7 @@ const Recurso = () => {
                 toast.current?.show({
                 severity: 'error',
                 summary: 'Erro!',
-                detail: 'Erro ao deletar recurso',
+                detail: error.response.data.message,
                 life: 5000
             });
             });
@@ -309,7 +344,6 @@ const Recurso = () => {
                             />
                             {submitted && !recurso.nome && <small className="p-invalid">Nome é obrigatório.</small>}
                         </div>
-
                         <div className="field">
                             <label htmlFor="chave">Chave</label>
                             <InputText
