@@ -1,4 +1,4 @@
-declare namespace Demo {
+declare namespace Projeto {
 
     type Usuario = {
         id?: number;
@@ -12,6 +12,11 @@ declare namespace Demo {
         id?: number;
         nome: string;
         chave: string;
+    }
+
+    type Perfil = {
+        id?: number;
+        descricao: string;
     }
 
 }
