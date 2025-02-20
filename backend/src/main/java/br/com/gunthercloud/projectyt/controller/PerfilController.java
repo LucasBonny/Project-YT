@@ -43,7 +43,6 @@ public class PerfilController implements ControllerModel<PerfilDTO> {
 	@Override
 	public ResponseEntity<PerfilDTO> insert(@RequestBody PerfilDTO obj) {
 		if(obj.getId() != null) obj.setId(null);
-		System.out.println(obj.getId() + " | " + obj.getDescricao());
 		obj = service.insert(obj);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
 		return ResponseEntity.created(uri).build();

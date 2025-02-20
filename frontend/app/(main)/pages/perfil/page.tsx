@@ -112,9 +112,7 @@ const Perfil = () => {
                     setShouldReloadResources(true);
                 })
                 .catch((error) => {
-                    console.log(error);
-                    console.log(perfil);
-                    toast.current?.show({
+                   toast.current?.show({
                         severity: 'error',
                         summary: 'Erro!',
                         detail: error.response?.data?.message || 'Erro desconhecido',

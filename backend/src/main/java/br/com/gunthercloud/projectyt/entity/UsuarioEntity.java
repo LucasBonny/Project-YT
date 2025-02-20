@@ -10,6 +10,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -32,6 +34,10 @@ public class UsuarioEntity {
 	@Column(nullable = false)
 	private String email;
 	
+	@ManyToOne
+	@JoinColumn(name = "PERFIL_ID")
+	private PerfilEntity perfil;
+	
 	public UsuarioEntity() {
 		
 	}
@@ -40,15 +46,14 @@ public class UsuarioEntity {
 		BeanUtils.copyProperties(usuario, this);
 	}
 
-	public UsuarioEntity(Long id, String nome, String login, String senha, String email) {
+	public UsuarioEntity(Long id, String nome, String login, String senha, String email, PerfilEntity perfil) {
 		this.id = id;
 		this.nome = nome;
 		this.login = login;
 		this.senha = senha;
 		this.email = email;
+		this.perfil = perfil;
 	}
-
-
 
 	public Long getId() {
 		return id;
@@ -88,6 +93,14 @@ public class UsuarioEntity {
 
 	public void setSenha(String senha) {
 		this.senha = senha;
+	}
+
+	public PerfilEntity getPerfil() {
+		return perfil;
+	}
+
+	public void setPerfil(PerfilEntity perfil) {
+		this.perfil = perfil;
 	}
 
 	@Override

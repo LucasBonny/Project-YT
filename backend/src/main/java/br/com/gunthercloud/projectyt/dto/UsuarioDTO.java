@@ -11,13 +11,24 @@ public class UsuarioDTO {
 	private String login;
 	private String senha;
 	private String email;
+	private PerfilDTO perfil;
 	
 	public UsuarioDTO() {
 		
 	}
 	
+	public UsuarioDTO(Long id, String nome, String login, String senha, String email, PerfilDTO perfil) {
+		this.id = id;
+		this.nome = nome;
+		this.login = login;
+		this.senha = senha;
+		this.email = email;
+		this.perfil = perfil;
+	}
+
 	public UsuarioDTO(UsuarioEntity usuario) {
 		BeanUtils.copyProperties(usuario, this);
+		perfil = new PerfilDTO(usuario.getPerfil());
 	}
 	
 	public Long getId() {
@@ -49,6 +60,12 @@ public class UsuarioDTO {
 	}
 	public void setEmail(String email) {
 		this.email = email;
+	}
+	public PerfilDTO getPerfil() {
+		return perfil;
+	}
+	public void setPerfil(PerfilDTO perfil) {
+		this.perfil = perfil;
 	}
 
 }
