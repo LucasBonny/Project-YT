@@ -1,10 +1,11 @@
 package br.com.gunthercloud.projectyt.service;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ServiceModel<T> {
 	
-	List<T> findAll();
+	Page<T> findAll(Pageable pageable);
 	T findById(Long id);
 	T insert(T obj);
 	T update(Long id, T obj);

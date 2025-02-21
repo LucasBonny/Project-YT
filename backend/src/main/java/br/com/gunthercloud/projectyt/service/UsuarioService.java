@@ -1,8 +1,10 @@
 package br.com.gunthercloud.projectyt.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import br.com.gunthercloud.projectyt.dto.PerfilDTO;
@@ -21,9 +23,10 @@ public class UsuarioService implements ServiceModel<UsuarioDTO> {
 	private PerfilRepository perfil;
 	
 	@Override
-	public List<UsuarioDTO> findAll() {
-		List<UsuarioEntity> usuarios = repository.findAll();
-		return usuarios.stream().map(x -> new UsuarioDTO(x, x.getPerfil())).toList();
+	public Page<UsuarioDTO> findAll(Pageable pageable) {
+		if(pageable.getSort().isEmpty()) pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), Sort.by("id"));
+		Page<UsuarioEntity> usuarios = repository.findAll(pageable);
+		return usuarios.map(x -> new UsuarioDTO(x, x.getPerfil()));
 	}
 	
 	@Override

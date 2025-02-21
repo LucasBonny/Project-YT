@@ -1,9 +1,11 @@
 package br.com.gunthercloud.projectyt.controller;
 
 import java.net.URI;
-import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -29,8 +31,8 @@ public class RecursoController implements ControllerModel<RecursoDTO> {
 
 	@GetMapping
 	@Override
-	public ResponseEntity<List<RecursoDTO>> findAll() {
-		return ResponseEntity.ok().body(service.findAll());
+	public ResponseEntity<Page<RecursoDTO>> findAll(@PageableDefault(sort = "id") Pageable pageable) {
+		return ResponseEntity.ok().body(service.findAll(pageable));
 	}
 
 	@GetMapping(value = "/{id}")

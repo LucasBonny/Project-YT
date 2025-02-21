@@ -1,8 +1,8 @@
 package br.com.gunthercloud.projectyt.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.gunthercloud.projectyt.dto.RecursoDTO;
@@ -16,9 +16,9 @@ public class RecursoService implements ServiceModel<RecursoDTO> {
 	private RecursoRepository repository;
 	
 	@Override
-	public List<RecursoDTO> findAll() {
-		List<RecursoEntity> recurso = repository.findAll();
-		return recurso.stream().map(RecursoDTO::new).toList();
+	public Page<RecursoDTO> findAll(Pageable pageable) {
+		Page<RecursoEntity> recurso = repository.findAll(pageable);
+		return recurso.map(RecursoDTO::new);
 	}
 	
 	@Override

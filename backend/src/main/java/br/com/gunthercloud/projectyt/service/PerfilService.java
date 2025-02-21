@@ -1,8 +1,8 @@
 package br.com.gunthercloud.projectyt.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import br.com.gunthercloud.projectyt.dto.PerfilDTO;
@@ -16,9 +16,9 @@ public class PerfilService implements ServiceModel<PerfilDTO> {
 	private PerfilRepository repository;
 	
 	@Override
-	public List<PerfilDTO> findAll() {
-		List<PerfilEntity> usuarios = repository.findAll();
-		return usuarios.stream().map(PerfilDTO::new).toList();
+	public Page<PerfilDTO> findAll(Pageable pageable) {
+		Page<PerfilEntity> usuarios = repository.findAll(pageable);
+		return usuarios.map(PerfilDTO::new);
 	}
 	
 	@Override

@@ -40,24 +40,40 @@ const Usuario = () => {
     const usuarioService = useMemo(() => new UsuarioService(), []);
     const perfilService = useMemo(() => new PerfilService(), []);
     const [perfil, setPerfil] = useState<Projeto.Perfil[]>([]);
+    const [shouldReloadResources, setShouldReloadResources] = useState(false);
 
     useEffect(() => {
-        if(usuarios.length == 0) {
-            usuarioService.listarTodos().then((response) => {
-                setUsuarios(response.data);
-            }).catch((error) => console.log(error));
+        const loadData = () => {
+            usuarioService.listarTodos()
+                .then((response) => {
+                    setShouldReloadResources(false); 
+                    setUsuarios(response.data.content);
+                })
+                .catch((error) => {
+                    console.log(error);
+                    toast.current?.show({
+                        severity: 'error',
+                        summary: 'Erro',
+                        detail: 'Falha ao carregar usuários',
+                        life: 5000
+                    });
+                });
+        };
+        if (shouldReloadResources || usuarios.length === 0) {
+            loadData();
         }
-    }, [usuarioService, usuarios]);
+    }, [usuarioService, shouldReloadResources, usuarios.length]);
 
     useEffect(() => {
         if(usuarioDialog) {
             perfilService.listarTodos().then((response) => {
-                setPerfil(response.data);
+                setPerfil(response.data.content);
+                setShouldReloadResources(false);
             }).catch((error) => {
                 toast.current?.show({
                     severity: 'error',
                     summary: 'Erro!',
-                    detail: error.response.data.message,
+                    detail: error.response.data.content.message,
                     life: 5000
                 });
             });
@@ -86,7 +102,7 @@ const Usuario = () => {
     const saveUsuario = () => {
         setSubmitted(true);
     
-        const requiredFields = ['nome', 'login', 'senha', 'email', 'descricao']; 
+        const requiredFields = ['nome', 'login', 'senha', 'email']; 
         
         const hasEmptyField = requiredFields.some(field => 
             !usuario[field]?.trim()
@@ -205,7 +221,7 @@ const Usuario = () => {
                 toast.current?.show({
                 severity: 'error',
                 summary: 'Erro!',
-                detail: error.response.data.message,
+                detail: error.response.data.content.message,
                 life: 5000
             });
             });
@@ -339,7 +355,7 @@ const Usuario = () => {
                         dataKey="id"
                         paginator
                         rows={10}
-                        rowsPerPageOptions={[5, 10, 25]}
+                        rowsPerPageOptions={[10, 25, 50, 100]}
                         className="datatable-responsive"
                         paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
                         currentPageReportTemplate="Mostrando {first} de {last} com {totalRecords} usuários"
@@ -380,7 +396,6 @@ const Usuario = () => {
                                 value={usuario.login}
                                 onChange={(e) => onInputChange(e, 'login')}
                                 required
-                                autoFocus
                                 className={classNames({
                                     'p-invalid': submitted && !usuario.login
                                 })}
@@ -395,7 +410,6 @@ const Usuario = () => {
                                 value={usuario.senha}
                                 onChange={(e) => onInputChange(e, 'senha')}
                                 required
-                                autoFocus
                                 className={classNames({
                                     'p-invalid': submitted && !usuario.senha
                                 })}
@@ -410,7 +424,6 @@ const Usuario = () => {
                                 value={usuario.email}
                                 onChange={(e) => onInputChange(e, 'email')}
                                 required
-                                autoFocus
                                 className={classNames({
                                     'p-invalid': submitted && !usuario.email
                                 })}
@@ -427,7 +440,6 @@ const Usuario = () => {
                                 optionLabel="descricao"
                                 placeholder="Selecione um perfil"
                                 required
-                                autoFocus
                                 className={classNames({
                                     'p-invalid': submitted && !usuario.descricao
                                 })}

@@ -1,10 +1,13 @@
 package br.com.gunthercloud.projectyt.dto;
 
+import java.io.Serializable;
+
 import org.springframework.beans.BeanUtils;
 
 import br.com.gunthercloud.projectyt.entity.RecursoEntity;
 
-public class RecursoDTO {
+public class RecursoDTO implements Serializable{
+	private static final long serialVersionUID = 1L;
 
 	private Long id;
 	private String nome;
