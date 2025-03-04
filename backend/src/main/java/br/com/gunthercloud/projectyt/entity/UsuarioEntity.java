@@ -6,8 +6,11 @@ import java.util.Objects;
 import org.springframework.beans.BeanUtils;
 
 import br.com.gunthercloud.projectyt.dto.UsuarioDTO;
+import br.com.gunthercloud.projectyt.entity.enums.TipoSituacaoUsuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,6 +38,10 @@ public class UsuarioEntity implements Serializable{
 
 	@Column(nullable = false)
 	private String email;
+	
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private TipoSituacaoUsuario situacao;
 	
 	@ManyToOne
 	@JoinColumn(name = "PERFIL_ID")
@@ -98,6 +105,14 @@ public class UsuarioEntity implements Serializable{
 		this.senha = senha;
 	}
 
+	public TipoSituacaoUsuario getSituacao() {
+		return situacao;
+	}
+
+	public void setSituacao(TipoSituacaoUsuario situacao) {
+		this.situacao = situacao;
+	}
+
 	public PerfilEntity getPerfil() {
 		return perfil;
 	}
@@ -126,8 +141,9 @@ public class UsuarioEntity implements Serializable{
 	@Override
 	public String toString() {
 		return "UsuarioEntity [id=" + id + ", nome=" + nome + ", login=" + login + ", senha=" + senha + ", email="
-				+ email + ", perfil=" + perfil.getDescricao() + "]";
+				+ email + ", situacao=" + situacao + ", perfil=" + perfil.getDescricao() + "]";
 	}
+
 	
 	
 }

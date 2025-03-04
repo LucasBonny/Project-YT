@@ -6,6 +6,7 @@ import org.springframework.beans.BeanUtils;
 
 import br.com.gunthercloud.projectyt.entity.PerfilEntity;
 import br.com.gunthercloud.projectyt.entity.UsuarioEntity;
+import br.com.gunthercloud.projectyt.entity.enums.TipoSituacaoUsuario;
 
 public class UsuarioDTO implements Serializable{
 	private static final long serialVersionUID = 1L;
@@ -15,6 +16,7 @@ public class UsuarioDTO implements Serializable{
 	private String login;
 	private String senha;
 	private String email;
+	private TipoSituacaoUsuario situacao;
 	private PerfilDTO perfil;
 	
 	public UsuarioDTO() {
@@ -68,6 +70,12 @@ public class UsuarioDTO implements Serializable{
 	public void setEmail(String email) {
 		this.email = email;
 	}
+	public TipoSituacaoUsuario getSituacao() {
+		return situacao;
+	}
+	public void setSituacao(TipoSituacaoUsuario situacao) {
+		this.situacao = situacao;
+	}
 	public PerfilDTO getPerfil() {
 		return perfil;
 	}
@@ -78,8 +86,10 @@ public class UsuarioDTO implements Serializable{
 	@Override
 	public String toString() {
 		return "UsuarioDTO [id=" + id + ", nome=" + nome + ", login=" + login + ", senha=" + senha + ", email=" + email
-				+ ", perfil()=" + getPerfil().getDescricao() + "]";
+				+ ", perfil=" + perfil.getDescricao() + ", situacao=" + situacao + "]";
 	}
+
+	
 	
 	
 
