@@ -32,6 +32,7 @@ public class RecursoService implements ServiceModel<RecursoDTO> {
 	
 	@Override
 	public RecursoDTO insert(RecursoDTO obj) {
+		obj.setId(null);
 		RecursoEntity entity = new RecursoEntity(obj);
 		entity = repository.save(entity);
 		return new RecursoDTO(entity);

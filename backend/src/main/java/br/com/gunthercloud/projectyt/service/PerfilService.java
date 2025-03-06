@@ -28,6 +28,7 @@ public class PerfilService implements ServiceModel<PerfilDTO> {
 
 	@Override
 	public PerfilDTO insert(PerfilDTO obj) {
+		obj.setId(null);
 		PerfilEntity entity = repository.save(new PerfilEntity(obj));
 		return new PerfilDTO(entity);
 	}

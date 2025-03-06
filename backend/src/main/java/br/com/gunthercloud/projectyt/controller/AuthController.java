@@ -31,13 +31,13 @@ public class AuthController {
 		return ResponseEntity.ok(authService.login(authDto));
 	}
 	
-	@PostMapping(value = "/novoUsuario")
-	public void inserirNovoUsuario(@RequestBody UsuarioDTO novoUsuario){
-		service.insert(novoUsuario);
+	@PostMapping(value = "/register")
+	public ResponseEntity<UsuarioDTO> insert(@RequestBody UsuarioDTO obj){
+		return ResponseEntity.ok().body(service.insert(obj));
 	}
 	
 	@GetMapping(value = "/verificarCadastro/{uuid}")
-	public String verificarCadastro(@PathVariable("uuid") String uuid) {
+	public String verificarCadastro(@PathVariable String uuid) {
 		return service.verificarCadastro(uuid);
 	}
 	
