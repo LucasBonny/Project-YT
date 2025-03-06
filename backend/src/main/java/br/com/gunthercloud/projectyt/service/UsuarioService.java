@@ -3,7 +3,6 @@ package br.com.gunthercloud.projectyt.service;
 import java.time.Instant;
 import java.util.UUID;
 
-import org.apache.tomcat.util.json.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -61,7 +60,8 @@ public class UsuarioService implements ServiceModel<UsuarioDTO> {
 		obj.setSenha(passwordEncoderMethod(obj.getSenha()));
 		obj.setSituacao(TipoSituacaoUsuario.PENDENTE);
 		UsuarioEntity user = repository.save(new UsuarioEntity(obj));
-		System.out.println(emailService.enviarEmailTexto("lucasbonnyb8@gmail.com", "Registro OK", user.toString()));
+		UsuarioVerificadorEntity verificador = createUserVerifier(user);
+		System.out.println(emailService.enviarEmailTexto("lucasbonnyb8@gmail.com", "Registro OK", "Seu token de validação é: " + verificador.getUuid()));
 		return new UsuarioDTO(user, user.getPerfil());
 	}
 	
@@ -106,4 +106,12 @@ public class UsuarioService implements ServiceModel<UsuarioDTO> {
 		return passwordEncoder.encode(password);
 	}
 	
+	private UsuarioVerificadorEntity createUserVerifier(UsuarioEntity entity) {
+		UsuarioVerificadorEntity verificador = new UsuarioVerificadorEntity();
+		verificador.setUsuario(entity);
+		verificador.setUuid(UUID.randomUUID());
+		verificador.setDataExpiracao(Instant.now().plusMillis(9000));
+		usuarioVerificadorRepository.save(verificador);
+		return verificador;
+	}
 }

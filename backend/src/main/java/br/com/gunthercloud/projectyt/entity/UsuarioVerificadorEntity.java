@@ -28,7 +28,7 @@ public class UsuarioVerificadorEntity {
 	private Instant dataExpiracao;
 	
 	@ManyToOne
-	@JoinColumn(name = "ID_USUARIO", referencedColumnName = "ID", unique = true)
+	@JoinColumn(name = "ID_USUARIO", unique = true)
 	private UsuarioEntity usuario;
 
 	public UsuarioVerificadorEntity() {
