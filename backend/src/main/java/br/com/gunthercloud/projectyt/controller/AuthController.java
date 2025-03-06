@@ -32,13 +32,13 @@ public class AuthController {
 	}
 	
 	@PostMapping(value = "/register")
-	public ResponseEntity<UsuarioDTO> insert(@RequestBody UsuarioDTO obj){
+	public ResponseEntity<UsuarioDTO> register(@RequestBody UsuarioDTO obj){
 		return ResponseEntity.ok().body(service.insert(obj));
 	}
 	
-	@GetMapping(value = "/verificarCadastro/{uuid}")
-	public String verificarCadastro(@PathVariable String uuid) {
-		return service.verificarCadastro(uuid);
+	@GetMapping(value = "/check/{uuid}")
+	public ResponseEntity<String> checkUserRegistration(@PathVariable String uuid) {
+		return ResponseEntity.ok().body(service.checkRegistration(uuid));
 	}
 	
 }

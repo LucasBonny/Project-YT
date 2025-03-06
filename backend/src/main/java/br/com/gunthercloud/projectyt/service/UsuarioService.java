@@ -1,6 +1,7 @@
 package br.com.gunthercloud.projectyt.service;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,25 +82,23 @@ public class UsuarioService implements ServiceModel<UsuarioDTO> {
 		repository.delete(user);
 	}
 
-	public String verificarCadastro(String uuid) {
-	
-		UsuarioVerificadorEntity usuarioVerificacao = usuarioVerificadorRepository.findByUuid(UUID.fromString(uuid)).get();
-		
-		if(usuarioVerificacao != null) {
-			if(usuarioVerificacao.getDataExpiracao().compareTo(Instant.now()) >= 0) {
-				
-				UsuarioEntity u = usuarioVerificacao.getUsuario();
+	public String checkRegistration(String uuid) {
+		Optional<UsuarioVerificadorEntity> usuarioVerifier = usuarioVerificadorRepository.findByUuid(UUID.fromString(uuid));
+		if(usuarioVerifier.isPresent()) {
+			if(usuarioVerifier.get().getDataExpiracao().compareTo(Instant.now()) >= 0) {
+				UsuarioEntity u = usuarioVerifier.get().getUsuario();
+				u.setSituacao(TipoSituacaoUsuario.ATIVO);
 				repository.save(u);
-				
 				return "Usuário Verificado";
-			}else {
-				usuarioVerificadorRepository.delete(usuarioVerificacao);
+			}
+			else {
+				usuarioVerificadorRepository.delete(usuarioVerifier.get());
 				return "Tempo de verificação expirado";
 			}
-		}else {
+		}
+		else {
 			return "Usuario não verificado";
 		}
-		
 	}
 	
 	private String passwordEncoderMethod(String password) {
@@ -110,7 +109,7 @@ public class UsuarioService implements ServiceModel<UsuarioDTO> {
 		UsuarioVerificadorEntity verificador = new UsuarioVerificadorEntity();
 		verificador.setUsuario(entity);
 		verificador.setUuid(UUID.randomUUID());
-		verificador.setDataExpiracao(Instant.now().plusMillis(9000));
+		verificador.setDataExpiracao(Instant.now().plusMillis(900000));
 		usuarioVerificadorRepository.save(verificador);
 		return verificador;
 	}
