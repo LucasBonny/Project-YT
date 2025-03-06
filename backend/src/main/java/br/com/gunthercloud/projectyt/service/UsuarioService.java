@@ -57,12 +57,16 @@ public class UsuarioService implements ServiceModel<UsuarioDTO> {
 		if(repository.existsByLogin(obj.getLogin())) 
 			throw new IllegalArgumentException("Login já existe!");
 		obj.setId(null);
-		obj.setPerfil(new PerfilDTO(perfil.getReferenceById(obj.getPerfil().getId())));
 		obj.setSenha(passwordEncoderMethod(obj.getSenha()));
+		obj.setPerfil(new PerfilDTO(perfil.getReferenceById(1L)));
 		obj.setSituacao(TipoSituacaoUsuario.PENDENTE);
 		UsuarioEntity user = repository.save(new UsuarioEntity(obj));
 		UsuarioVerificadorEntity verificador = createUserVerifier(user);
-		System.out.println(emailService.enviarEmailTexto("lucasbonnyb8@gmail.com", "Registro OK", "Seu token de validação é: " + verificador.getUuid()));
+		System.out.println(emailService.enviarEmailTexto(
+			    obj.getEmail(), 
+			    "Seja bem vindo!", 
+			    "Olá " + obj.getNome().substring(0, (obj.getNome().contains(" ") ? obj.getNome().indexOf(" ") : obj.getNome().length())) 
+			    + ",\n\nSeu token de validação é: " + verificador.getUuid()));
 		return new UsuarioDTO(user, user.getPerfil());
 	}
 	
