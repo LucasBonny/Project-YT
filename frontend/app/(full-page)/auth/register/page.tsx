@@ -2,13 +2,11 @@
 'use client';
 import { useRouter } from 'next/navigation';
 import React, { useContext, useMemo, useRef, useState } from 'react';
-import { Checkbox } from 'primereact/checkbox';
 import { Button } from 'primereact/button';
 import { Password } from 'primereact/password';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
-import { UsuarioService } from '@/service/UsuarioService';
 import { LoginService } from '@/service/LoginService';
 import { Toast } from 'primereact/toast';
 

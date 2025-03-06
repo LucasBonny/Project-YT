@@ -9,4 +9,8 @@ export class LoginService {
     insertUser(usuario: Projeto.Usuario) {
         return axiosInstance.post('/auth/register', usuario)
     }
+
+    login(login: String, senha: String) {
+        return axiosInstance.post('/auth/login', { username: login, password: senha })
+    }
 }

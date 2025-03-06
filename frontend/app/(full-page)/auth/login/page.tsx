@@ -1,24 +1,69 @@
 /* eslint-disable @next/next/no-img-element */
 'use client';
 import { useRouter } from 'next/navigation';
-import React, { useContext, useState } from 'react';
-import { Checkbox } from 'primereact/checkbox';
+import React, { useContext, useMemo, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Password } from 'primereact/password';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
+import { LoginService } from '@/service/LoginService';
+import { Toast } from 'primereact/toast';
 
 const LoginPage = () => {
-    const [password, setPassword] = useState('');
-    const [checked, setChecked] = useState(false);
     const { layoutConfig } = useContext(LayoutContext);
+
+    let usuarioVazio: Projeto.Usuario = {
+        id: 0,
+        nome: '',
+        login: '',
+        senha: '',
+        email: '',
+        perfil: {
+            id: 0,
+            descricao: ''
+        }
+    };
+
+    const [usuario, setUsuario] = useState<Projeto.Usuario>(usuarioVazio);
+
+    const [login, setLogin] = useState('');
+    const [password, setPassword] = useState('');
+
+    const loginService = useMemo(() => new LoginService(), []);
+        const toast = useRef<Toast>(null);
 
     const router = useRouter();
     const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
 
+    const efetuarLogin = () => {
+        
+        loginService.login(login, password).then((response) => {
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Sucesso',
+                detail: 'Logado com sucesso!',
+                life: 5000
+            });
+            console.log(response.data.token);
+            localStorage.setItem('token', response.data.token);
+            router.push('/');
+            setUsuario(usuarioVazio);
+        }).catch(() => {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Erro',
+                detail: "Usuário ou senha inválidos",
+                life: 5000
+            });
+        });
+        setLogin('');
+        setPassword('');
+    };
+
     return (
         <div className={containerClassName}>
+            <Toast ref={toast} /> 
             <div className="flex flex-column align-items-center justify-content-center">
                 <img src={`/layout/images/logo-${layoutConfig.colorScheme === 'light' ? 'dark' : 'white'}.svg`} alt="Sakai logo" className="mb-5 w-6rem flex-shrink-0" />
                 <div
@@ -34,10 +79,10 @@ const LoginPage = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="email1" className="block text-900 text-xl font-medium mb-2">
-                                Email
+                            <label htmlFor="login1" className="block text-900 text-xl font-medium mb-2">
+                                Login
                             </label>
-                            <InputText id="email1" type="text" placeholder="Insira seu email" className="w-full md:w-30rem mb-5" style={{ padding: '1rem' }} />
+                            <InputText id="login1" value={login} onChange={(e) => setLogin(e.target.value)} type="text" placeholder="Insira seu login" className="w-full md:w-30rem mb-5" style={{ padding: '1rem' }} />
 
                             <label htmlFor="password1" className="block text-900 font-medium text-xl mb-2">
                                 Senha
@@ -52,7 +97,7 @@ const LoginPage = () => {
                                     Esqueci minha senha
                                 </a>
                             </div>
-                            <Button label="Sign In" className="w-full p-3 text-xl" onClick={() => router.push('/')}></Button>
+                            <Button label="Entrar" className="w-full p-3 text-xl" onClick={() => efetuarLogin()}></Button>
                         </div>
                     </div>
                 </div>

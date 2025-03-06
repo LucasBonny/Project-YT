@@ -41,7 +41,7 @@ public class AuthService {
 			return accessDto;
 			
 			}catch(BadCredentialsException e) {
-				//TODO LOGIN OU SENHA INVALIDO
+				e.printStackTrace();
 			}
 			return new AcessDTO("Acesso negado");
 		}
